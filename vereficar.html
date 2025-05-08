@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in - Clínica Odontológica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="background">
+        <div class="container">
+            <h1>Check-in para Pacientes</h1>
+            <p>Bem-vindo à nossa clínica! Para verificar seu atendimento, basta preencher o campo abaixo com o seu CPF.</p>
+            <form action="/CHECKIN-CLINICA/checkin.php" method="POST">
+                <label for="cpf">Digite seu CPF:</label>
+                <input type="text" id="cpf" name="cpf" required placeholder="Ex: 123.456.789-00" maxlength="14" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}">
+                <button type="submit">Confirmar Check-in</button>
+            </form>
+
+            <a href="index.html" class="btn-voltar">Voltar</a>
+        </div>
+        
+    </div>
+    <style>
+        .btn-voltar {
+    margin-top: 10px;
+    padding: 12px 20px;
+    background-color: #2575fc;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+  }
+    </style>
+</body>
+</html>
