@@ -1,168 +1,42 @@
 <?php
 // Conexão com o banco
 $host = 'localhost';
-$db = 'clinica'; // Substitua pelo nome do seu banco
+$db = 'clinica';
 $user = 'root';
 $pass = '';
-$pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
 
-// Lógica de inserção
-$mensagem = '';
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+} catch (PDOException $e) {
+    header("Location: cadastro_paciente.html?error=1");
+    exit;
+}
+
+// Se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = $_POST['nome'];
-    $cpf = $_POST['cpf'];
-    $telefone = $_POST['telefone'];
-    $email = $_POST['email'];
+    $nome = $_POST['nome'] ?? '';
+    $cpf = $_POST['cpf'] ?? '';
+    $telefone = $_POST['telefone'] ?? '';
+    $email = $_POST['email'] ?? '';
 
-    $stmt = $pdo->prepare("INSERT INTO pacientes (nome, cpf, telefone, email) VALUES (?, ?, ?, ?)");
-    if ($stmt->execute([$nome, $cpf, $telefone, $email])) {
-        $mensagem = "Paciente cadastrado com sucesso!";
-    } else {
-        $mensagem = "Erro ao cadastrar paciente.";
+    // Verifica se CPF já existe
+    $stmt = $pdo->prepare("SELECT id FROM pacientes WHERE cpf = ?");
+    $stmt->execute([$cpf]);
+    $existe = $stmt->fetch();
+
+    if ($existe) {
+        header("Location: cadastro_paciente.html?error=cpf_duplicado");
+        exit;
     }
+
+    // Inserção
+    try {
+        $stmt = $pdo->prepare("INSERT INTO pacientes (nome, cpf, telefone, email) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$nome, $cpf, $telefone, $email]);
+        header("Location: cadastro_paciente.html?success=1");
+    } catch (PDOException $e) {
+        header("Location: cadastro_paciente.html?error=1");
+    }
+    exit;
 }
 ?>
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Cadastrar Paciente</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    .background {
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .btn-voltar {
-      margin-top: 10px;
-      padding: 12px 20px;
-      background-color: #2575fc;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    .container {
-      background-color: #fff;
-      padding: 40px 50px;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      max-width: 500px;
-      width: 100%;
-      animation: fadeIn 1.5s ease-in-out;
-    }
-
-    h1 {
-      font-size: 28px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-      font-size: 16px;
-      transition: 0.3s;
-    }
-
-    input:focus {
-      border-color: #2575fc;
-      outline: none;
-      box-shadow: 0 0 5px rgba(37, 117, 252, 0.4);
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #2575fc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #6a11cb;
-    }
-
-    .mensagem {
-      margin-bottom: 20px;
-      color: green;
-      font-weight: bold;
-    }
-
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 30px 40px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      button {
-        font-size: 16px;
-      }
-
-      input {
-        font-size: 14px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="background">
-    <div class="container">
-      <h1>Cadastrar Paciente</h1>
-      
-      <?php if ($mensagem): ?>
-        <div class="mensagem"><?= $mensagem ?></div>
-      <?php endif; ?>
-
-      <form method="POST">
-        <input type="text" name="nome" placeholder="Nome completo" required>
-        <input type="text" name="cpf" placeholder="CPF (somente números ou formatado)" required>
-        <input type="text" name="telefone" placeholder="Telefone" required>
-        <input type="email" name="email" placeholder="E-mail" required>
-        <button type="submit">Cadastrar</button>
-      </form>
-      <a href="index.html" class="btn-voltar">Voltar</a>
-    </div>
-   
-  </div>
-</body>
-</html>
